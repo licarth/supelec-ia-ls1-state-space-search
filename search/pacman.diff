@@ -1,0 +1,478 @@
+--- .\eightpuzzle.py	(original)
++++ .\eightpuzzle.py	(refactored)
+@@ -263,13 +263,13 @@
+
+   problem = EightPuzzleSearchProblem(puzzle)
+   path = search.breadthFirstSearch(problem)
+-  print('BFS found a path of %d moves: %s' % (len(path), str(path)))
++  print(('BFS found a path of %d moves: %s' % (len(path), str(path))))
+   curr = puzzle
+   i = 1
+   for a in path:
+     curr = curr.result(a)
+-    print('After %d move%s: %s' % (i, ("", "s")[i>1], a))
++    print(('After %d move%s: %s' % (i, ("", "s")[i>1], a)))
+     print(curr)
+
+-    raw_input("Press return for the next state...")   # wait for key stroke
++    input("Press return for the next state...")   # wait for key stroke
+     i += 1
+
+--- .\game.py	(original)
++++ .\game.py	(refactored)
+@@ -51,7 +51,7 @@
+                  WEST:  SOUTH,
+                  STOP:  STOP}
+
+-  RIGHT =      dict([(y,x) for x, y in LEFT.items()])
++  RIGHT =      dict([(y,x) for x, y in list(LEFT.items())])
+
+   REVERSE = {NORTH: SOUTH,
+              SOUTH: NORTH,
+@@ -252,7 +252,7 @@
+
+   def _unpackInt(self, packed, size):
+     bools = []
+-    if packed < 0: raise(ValueError, "must be a positive integer")
++    if packed < 0: raise ValueError
+     for i in range(size):
+       n = 2 ** (self.CELLS_PER_INT - i - 1)
+       if packed >= n:
+@@ -283,7 +283,7 @@
+                  Directions.WEST:  (-1, 0),
+                  Directions.STOP:  (0, 0)}
+
+-  _directionsAsList = _directions.items()
++  _directionsAsList = list(_directions.items())
+
+   TOLERANCE = .001
+
+@@ -526,11 +526,11 @@
+   def mute(self):
+     if not self.muteAgents: return
+     global OLD_STDOUT, OLD_STDERR
+-    import cStringIO
++    import io
+     OLD_STDOUT = sys.stdout
+     OLD_STDERR = sys.stderr
+-    sys.stdout = cStringIO.StringIO()
+-    sys.stderr = cStringIO.StringIO()
++    sys.stdout = io.StringIO()
++    sys.stderr = io.StringIO()
+
+   def unmute(self):
+     if not self.muteAgents: return
+@@ -569,7 +569,7 @@
+               time_taken = time.time() - start_time
+               self.totalAgentTimes[i] += time_taken
+             except TimeoutFunctionException:
+-              print("Agent %d ran out of time on startup!", i)
++              print(("Agent %d ran out of time on startup!", i))
+               self.unmute()
+               self.agentTimeout = True
+               self._agentCrash(i, quiet=True)
+@@ -626,7 +626,7 @@
+               raise TimeoutFunctionException()
+             action = timed_func( observation )
+           except TimeoutFunctionException:
+-            print("Agent %d timed out on a single move!", agentIndex)
++            print(("Agent %d timed out on a single move!", agentIndex))
+             self.agentTimeout = True
+             self.unmute()
+             self._agentCrash(agentIndex, quiet=True)
+@@ -636,9 +636,9 @@
+
+           if move_time > self.rules.getMoveWarningTime(agentIndex):
+             self.totalAgentTimeWarnings[agentIndex] += 1
+-            print("Agent %d took too long to make a move! This is warning %d", (agentIndex, self.totalAgentTimeWarnings[agentIndex]))
++            print(("Agent %d took too long to make a move! This is warning %d", (agentIndex, self.totalAgentTimeWarnings[agentIndex])))
+             if self.totalAgentTimeWarnings[agentIndex] > self.rules.getMaxTimeWarnings(agentIndex):
+-              print("Agent %d exceeded the maximum number of warnings: %d", (agentIndex, self.totalAgentTimeWarnings[agentIndex]))
++              print(("Agent %d exceeded the maximum number of warnings: %d", (agentIndex, self.totalAgentTimeWarnings[agentIndex])))
+               self.agentTimeout = True
+               self.unmute()
+               self._agentCrash(agentIndex, quiet=True)
+@@ -646,7 +646,7 @@
+           self.totalAgentTimes[agentIndex] += move_time
+           #print("Agent: %d, time: %f, total: %f", (agentIndex, move_time, self.totalAgentTimes[agentIndex]))
+           if self.totalAgentTimes[agentIndex] > self.rules.getMaxTotalTime(agentIndex):
+-            print("Agent %d ran out of time! (time: %1.2f)", (agentIndex, self.totalAgentTimes[agentIndex]))
++            print(("Agent %d ran out of time! (time: %1.2f)", (agentIndex, self.totalAgentTimes[agentIndex])))
+             self.agentTimeout = True
+             self.unmute()
+             self._agentCrash(agentIndex, quiet=True)
+@@ -696,7 +696,7 @@
+         except(Exception,data):
+           if not self.catchExceptions: raise
+           self.unmute()
+-          print("Exception",data)
++          print(("Exception",data))
+           self._agentCrash(agent.index)
+           return
+     self.display.finish()
+
+--- .\graphicsDisplay.py	(original)
++++ .\graphicsDisplay.py	(refactored)
+@@ -52,7 +52,7 @@
+ GHOST_SIZE = 0.65
+ SCARED_COLOR = formatColor(1,1,1)
+
+-GHOST_VEC_COLORS = map(colorToVector, GHOST_COLORS)
++GHOST_VEC_COLORS = list(map(colorToVector, GHOST_COLORS))
+
+ PACMAN_COLOR = formatColor(255.0/255.0,255.0/255.0,61.0/255)
+ PACMAN_SCALE = 0.5
+
+--- .\graphicsUtils.py	(original)
++++ .\graphicsUtils.py	(refactored)
+@@ -30,7 +30,7 @@
+   return '#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255))
+
+ def colorToVector(color):
+-  return map(lambda x: int(x, 16) / 256.0, [color[1:3], color[3:5], color[5:7]])
++  return [int(x, 16) / 256.0 for x in [color[1:3], color[3:5], color[5:7]]]
+
+ if _Windows:
+     _canvas_tfonts = ['times new roman', 'lucida console']
+@@ -142,7 +142,7 @@
+         if _root_window != None:
+           _root_window.destroy()
+       except(SystemExit, e):
+-        print('Ending graphics raised an exception:', e)
++        print(('Ending graphics raised an exception:', e))
+     finally:
+       _root_window = None
+       _canvas = None
+@@ -286,11 +286,11 @@
+     d_o_e(d_w)
+     if _got_release:
+       d_o_e(d_w)
+-    return _keysdown.keys()
++    return list(_keysdown.keys())
+
+ def keys_waiting():
+   global _keyswaiting
+-  keys = _keyswaiting.keys()
++  keys = list(_keyswaiting.keys())
+   _keyswaiting = {}
+   return keys
+
+@@ -342,7 +342,7 @@
+             d_w=Tkinter._tkinter.DONT_WAIT):
+     if y is None:
+         try: x, y = x
+-        except: raise(Exception, 'incomprehensible coordinates')
++        except: raise Exception
+
+     horiz = True
+     newCoords = []
+
+--- .\layout.py	(original)
++++ .\layout.py	(refactored)
+@@ -10,6 +10,7 @@
+ from game import Grid
+ import os
+ import random
++from functools import reduce
+
+ VISIBILITY_MATRIX_CACHE = {}
+
+@@ -59,11 +60,11 @@
+     return self.walls[x][col]
+
+   def getRandomLegalPosition(self):
+-    x = random.choice(range(self.width))
+-    y = random.choice(range(self.height))
++    x = random.choice(list(range(self.width)))
++    y = random.choice(list(range(self.height)))
+     while self.isWall( (x, y) ):
+-      x = random.choice(range(self.width))
+-      y = random.choice(range(self.height))
++      x = random.choice(list(range(self.width)))
++      y = random.choice(list(range(self.height)))
+     return (x,y)
+
+   def getRandomCorner(self):
+
+--- .\pacman.py	(original)
++++ .\pacman.py	(refactored)
+@@ -272,11 +272,11 @@
+     if state.isLose(): self.lose(state, game)
+
+   def win( self, state, game ):
+-    if not self.quiet: print("Pacman emerges victorious! Score: %d", state.data.score)
++    if not self.quiet: print(("Pacman emerges victorious! Score: %d", state.data.score))
+     game.gameOver = True
+
+   def lose( self, state, game ):
+-    if not self.quiet: print("Pacman died! Score: %d", state.data.score)
++    if not self.quiet: print(("Pacman died! Score: %d", state.data.score))
+     game.gameOver = True
+
+   def getProgress(self, game):
+@@ -556,10 +556,10 @@
+
+   # Special case: recorded games don't use the runGames method or args structure
+   if options.gameToReplay != None:
+-    print("Replaying recorded game %s.", options.gameToReplay)
+-    import cPickle
++    print(("Replaying recorded game %s.", options.gameToReplay))
++    import pickle
+     f = open(options.gameToReplay)
+-    try: recorded = cPickle.load(f)
++    try: recorded = pickle.load(f)
+     finally: f.close()
+     recorded['display'] = args['display']
+     replayGame(**recorded)
+@@ -630,21 +630,21 @@
+     if not beQuiet: games.append(game)
+
+     if record:
+-      import time, cPickle
++      import time, pickle
+       fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
+       f = file(fname, 'w')
+       components = {'layout': layout, 'actions': game.moveHistory}
+-      cPickle.dump(components, f)
++      pickle.dump(components, f)
+       f.close()
+
+   if (numGames-numTraining) > 0:
+     scores = [game.state.getScore() for game in games]
+     wins = [game.state.isWin() for game in games]
+     winRate = wins.count(True)/ float(len(wins))
+-    print('Average Score:', sum(scores) / float(len(scores)))
+-    print('Scores:       ', ', '.join([str(score) for score in scores]))
+-    print('Win Rate:      %d/%d (%.2f)' , (wins.count(True), len(wins), winRate))
+-    print('Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins]))
++    print(('Average Score:', sum(scores) / float(len(scores))))
++    print(('Scores:       ', ', '.join([str(score) for score in scores])))
++    print(('Win Rate:      %d/%d (%.2f)' , (wins.count(True), len(wins), winRate)))
++    print(('Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins])))
+
+   return games
+
+
+--- .\search.py	(original)
++++ .\search.py	(refactored)
+@@ -82,9 +82,9 @@
+   print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+   """
+   "*** YOUR CODE HERE ***"
+-  print("Start:", problem.getStartState())
+-  print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+-  print("Start's successors:", problem.getSuccessors(problem.getStartState()))
++  print(("Start:", problem.getStartState()))
++  print(("Is the start a goal?", problem.isGoalState(problem.getStartState())))
++  print(("Start's successors:", problem.getSuccessors(problem.getStartState())))
+
+   start = (((0,0),'',0), (problem.getStartState(), '', 0)) # Beware: introducing [] action
+   nopen = []
+
+--- .\searchAgents.py	(original)
++++ .\searchAgents.py	(refactored)
+@@ -71,10 +71,10 @@
+
+     # Get the search function from the name and heuristic
+     if fn not in dir(search):
+-      raise(AttributeError, fn + ' is not a search function in search.py.')
++      raise AttributeError
+     func = getattr(search, fn)
+     if 'heuristic' not in func.__code__.co_varnames:
+-      print('[SearchAgent] using function ' + fn)
++      print(('[SearchAgent] using function ' + fn))
+       self.searchFunction = func
+     else:
+       if heuristic in dir(searchAgents):
+@@ -82,16 +82,16 @@
+       elif heuristic in dir(search):
+         heur = getattr(search, heuristic)
+       else:
+-        raise(AttributeError, heuristic + ' is not a function in searchAgents.py or search.py.')
+-      print('[SearchAgent] using function %s and heuristic %s' % (fn, heuristic))
++        raise AttributeError
++      print(('[SearchAgent] using function %s and heuristic %s' % (fn, heuristic)))
+       # Note: this bit of Python trickery combines the search algorithm and the heuristic
+       self.searchFunction = lambda x: func(x, heuristic=heur)
+
+     # Get the search problem type from the name
+     if prob not in dir(searchAgents) or not prob.endswith('Problem'):
+-      raise(AttributeError, prob + ' is not a search problem type in SearchAgents.py.')
++      raise AttributeError
+     self.searchType = getattr(searchAgents, prob)
+-    print('[SearchAgent] using problem type ' + prob)
++    print(('[SearchAgent] using problem type ' + prob))
+
+   def registerInitialState(self, state):
+     """
+@@ -101,13 +101,13 @@
+
+     state: a GameState object (pacman.py)
+     """
+-    if self.searchFunction == None: raise(Exception, "No search function provided for SearchAgent")
++    if self.searchFunction == None: raise Exception
+     starttime = time.time()
+     problem = self.searchType(state) # Makes a new search problem
+     self.actions  = self.searchFunction(problem) # Find a path
+     totalCost = problem.getCostOfActions(self.actions)
+-    print('Path found with total cost of %d in %.1f seconds' % (totalCost, time.time() - starttime))
+-    if '_expanded' in dir(problem): print('Search nodes expanded: %d' % problem._expanded)
++    print(('Path found with total cost of %d in %.1f seconds' % (totalCost, time.time() - starttime)))
++    if '_expanded' in dir(problem): print(('Search nodes expanded: %d' % problem._expanded))
+
+   def getAction(self, state):
+     """
+@@ -273,7 +273,7 @@
+     self.corners = ((1,1), (1,top), (right, 1), (right, top))
+     for corner in self.corners:
+       if not startingGameState.hasFood(*corner):
+-        print('Warning: no food in corner ' + str(corner))
++        print(('Warning: no food in corner ' + str(corner)))
+     self._expanded = 0 # Number of search nodes expanded
+
+     "*** YOUR CODE HERE ***"
+@@ -451,10 +451,10 @@
+         legal = currentState.getLegalActions()
+         if action not in legal:
+           t = (str(action), str(currentState))
+-          raise(Exception, 'findPathToClosestDot returned an illegal move: %s!\n%s' % t)
++          raise Exception
+         currentState = currentState.generateSuccessor(0, action)
+     self.actionIndex = 0
+-    print('Path found with cost %d.' % len(self.actions))
++    print(('Path found with cost %d.' % len(self.actions)))
+
+   def findPathToClosestDot(self, gameState):
+     "Returns a path (a list of actions) to the closest dot, starting from gameState"
+
+--- .\textDisplay.py	(original)
++++ .\textDisplay.py	(refactored)
+@@ -24,7 +24,7 @@
+     time.sleep(SLEEP_TIME)
+
+   def draw(self, state):
+-    print state
++    print(state)
+
+   def finish(self):
+     pass
+@@ -48,7 +48,7 @@
+       self.turn += 1
+       if DISPLAY_MOVES:
+         ghosts = [pacman.nearestPoint(state.getGhostPosition(i)) for i in range(1, numAgents)]
+-        print "%4d) P: %-8s" % (self.turn, str(pacman.nearestPoint(state.getPacmanPosition()))),'| Score: %-5d' % state.score,'| Ghosts:', ghosts
++        print("%4d) P: %-8s" % (self.turn, str(pacman.nearestPoint(state.getPacmanPosition()))),'| Score: %-5d' % state.score,'| Ghosts:', ghosts)
+       if self.turn % DRAW_EVERY == 0:
+         self.draw(state)
+         self.pause()
+@@ -59,7 +59,7 @@
+     time.sleep(SLEEP_TIME)
+
+   def draw(self, state):
+-    print state
++    print(state)
+
+   def finish(self):
+     pass
+
+--- .\util.py	(original)
++++ .\util.py	(refactored)
+@@ -166,8 +166,8 @@
+     """
+     Returns the key with the highest value.
+     """
+-    if len(self.keys()) == 0: return None
+-    all = self.items()
++    if len(list(self.keys())) == 0: return None
++    all = list(self.items())
+     values = [x[1] for x in all]
+     maxIndex = values.index(max(values))
+     return all[maxIndex][0]
+@@ -184,7 +184,7 @@
+     >>> a.sortedKeys()
+     ['second', 'third', 'first']
+     """
+-    sortedItems = self.items()
++    sortedItems = list(self.items())
+     compare = lambda x, y:  sign(y[1] - x[1])
+     sortedItems.sort(cmp=compare)
+     return [x[0] for x in sortedItems]
+@@ -204,7 +204,7 @@
+     """
+     total = float(self.totalCount())
+     if total == 0: return
+-    for key in self.keys():
++    for key in list(self.keys()):
+       self[key] = self[key] / total
+
+   def divideAll(self, divisor):
+@@ -262,7 +262,7 @@
+     >>> a['first']
+     1
+     """
+-    for key, value in y.items():
++    for key, value in list(y.items()):
+       self[key] += value
+
+   def __add__( self, y ):
+@@ -318,7 +318,7 @@
+     return addend
+
+ def raiseNotDefined():
+-  print("Method not implemented: %s", inspect.stack()[1][3])
++  print(("Method not implemented: %s", inspect.stack()[1][3]))
+   sys.exit(1)
+
+ def normalize(vectorOrCounter):
+@@ -330,7 +330,7 @@
+     counter = vectorOrCounter
+     total = float(counter.totalCount())
+     if total == 0: return counter
+-    for key in counter.keys():
++    for key in list(counter.keys()):
+       value = counter[key]
+       normalizedCounter[key] = value / total
+     return normalizedCounter
+@@ -358,7 +358,7 @@
+
+ def sample(distribution, values = None):
+   if type(distribution) == Counter:
+-    items = distribution.items()
++    items = list(distribution.items())
+     distribution = [i[1] for i in items]
+     values = [i[0] for i in items]
+   if sum(distribution) != 1:
+@@ -371,7 +371,7 @@
+   return values[i]
+
+ def sampleFromCounter(ctr):
+-  items = ctr.items()
++  items = list(ctr.items())
+   return sample([v for k,v in items], [k for k,v in items])
+
+ def getProbability(value, distribution, values):
+@@ -451,19 +451,19 @@
+     module = __import__(moduleName)
+     return getattr(module, objName)
+   else:
+-    modules = [obj for obj in namespace.values() if str(type(obj)) == "<type 'module'>"]
++    modules = [obj for obj in list(namespace.values()) if str(type(obj)) == "<type 'module'>"]
+     options = [getattr(module, name) for module in modules if name in dir(module)]
+-    options += [obj[1] for obj in namespace.items() if obj[0] == name ]
++    options += [obj[1] for obj in list(namespace.items()) if obj[0] == name ]
+     if len(options) == 1: return options[0]
+-    if len(options) > 1: raise(Exception, 'Name conflict for %s')
+-    raise(Exception, '%s not found as a method or class' % name)
++    if len(options) > 1: raise Exception
++    raise Exception
+
+ def pause():
+   """
+   Pauses the output stream awaiting user feedback.
+   """
+   print("<Press enter/return to continue>")
+-  raw_input()
++  input()
+
+
+ ## code to handle timeouts
